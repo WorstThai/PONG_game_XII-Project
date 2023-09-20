@@ -1,0 +1,804 @@
+import pygame, sys
+from pygame.locals import *
+import os
+import pygame.freetype
+
+#main display
+screen_width = 1200
+screen_height = 750
+screen = pygame.display.set_mode((screen_width,screen_height))
+pygame.display.set_caption('Pong')
+
+#initializing required values
+score = 0
+score1, score2 = 0,0
+oob, oob1, oob2 = 5, 5, 5
+a,j,i = 0,0,0
+k = screen_width - 370
+inc = 30
+global rectx, thic
+rectx = screen_width - 30
+thic = 50
+ball1x,ball1y = 400,400
+select,select1 = 0,0
+tryagain = 0
+hitx, hity = 0, 0
+hitxs, hitys = 0, 0
+
+#initializing modules
+pygame.init()
+clock=pygame.time.Clock()
+pygame.freetype.init()
+
+#Initializing Fonts
+font1 = pygame.freetype.Font('Pokemon_Gb.ttf', 80)
+letter = pygame.freetype.Font('Pokemon_Gb.ttf', 40)
+heading = pygame.freetype.Font('Heading.ttf', 40)
+heading1 = pygame.freetype.Font('FlynnHollow.ttf', 140)
+heading2 = pygame.freetype.Font('FlynnHollow.ttf', 100)
+heading3 = pygame.freetype.Font('SelawikSemilight.ttf', 20)
+options = pygame.freetype.Font('Heading.ttf', 30)
+options1 = pygame.freetype.Font('Heading.ttf', 25)
+mscore = pygame.freetype.Font('Heading.ttf', 40)
+lives = pygame.freetype.Font('MfLoveDings.ttf',40)
+
+def lives1():
+    if oob1 == 5:
+        lives.render_to(screen ,(190, screen_height/2 - 110), 'g', grey)
+        lives.render_to(screen ,(190, screen_height/2 - 65), 'g', grey)
+        lives.render_to(screen ,(190, screen_height/2 - 20), 'g', grey)
+        lives.render_to(screen ,(190, screen_height/2 + 25), 'g', grey)
+        lives.render_to(screen ,(190, screen_height/2 + 65), 'g', grey)
+    elif oob1 ==4:
+        lives.render_to(screen ,(190, screen_height/2 - 87.5), 'g', grey)
+        lives.render_to(screen ,(190, screen_height/2 - 42.5), 'g', grey)
+        lives.render_to(screen ,(190, screen_height/2 + 2.5), 'g', grey)
+        lives.render_to(screen ,(190, screen_height/2 + 47.5 ), 'g', grey)
+    elif oob1 == 3:
+        lives.render_to(screen ,(190, screen_height/2 - 65), 'g', grey)
+        lives.render_to(screen ,(190, screen_height/2 - 20), 'g', grey)
+        lives.render_to(screen ,(190, screen_height/2 + 25), 'g', grey)
+    elif oob1 == 2:
+        lives.render_to(screen ,(190, screen_height/2 - 42.5), 'g', grey)
+        lives.render_to(screen ,(190, screen_height/2 + 2.5), 'g', grey)
+    elif oob1 == 1:
+        lives.render_to(screen ,(190, screen_height/2 - 20), 'g', grey)
+
+    if oob2 == 5:
+        lives.render_to(screen ,(screen_width - 190, screen_height/2 - 110), 'g', grey)
+        lives.render_to(screen ,(screen_width - 190, screen_height/2 - 65), 'g', grey)
+        lives.render_to(screen ,(screen_width - 190, screen_height/2 - 20), 'g', grey)
+        lives.render_to(screen ,(screen_width - 190, screen_height/2 + 25), 'g', grey)
+        lives.render_to(screen ,(screen_width - 190, screen_height/2 + 65), 'g', grey)
+    elif oob2 ==4:
+        lives.render_to(screen ,(screen_width - 190, screen_height/2 - 87.5), 'g', grey)
+        lives.render_to(screen ,(screen_width - 190, screen_height/2 - 42.5), 'g', grey)
+        lives.render_to(screen ,(screen_width - 190, screen_height/2 + 2.5), 'g', grey)
+        lives.render_to(screen ,(screen_width - 190, screen_height/2 + 47.5 ), 'g', grey)
+    elif oob2 == 3:
+        lives.render_to(screen ,(screen_width - 190, screen_height/2 - 65), 'g', grey)
+        lives.render_to(screen ,(screen_width - 190, screen_height/2 - 20), 'g', grey)
+        lives.render_to(screen ,(screen_width - 190, screen_height/2 + 25), 'g', grey)
+    elif oob2 == 2:
+        lives.render_to(screen ,(screen_width - 190, screen_height/2 - 42.5), 'g', grey)
+        lives.render_to(screen ,(screen_width - 190, screen_height/2 + 2.5), 'g', grey)
+    elif oob2 == 1:
+        lives.render_to(screen ,(screen_width - 190, screen_height/2 - 20), 'g', grey)
+     
+def lives2():
+    global x
+    if oob == 5:
+        x = screen_width/2-100
+    elif oob == 4:
+        x = screen_width/2-77.5
+    elif oob == 3:
+        x = screen_width/2-55
+    elif oob == 2:
+        x = screen_width/2-35
+    elif oob == 1:
+        x = screen_width/2-14
+
+def computer_boundary():
+    pygame.draw.line(screen,(255,255,255),(20, 20),(screen_width/2 - 115, 20), 2)
+    pygame.draw.line(screen,(255,255,255),(screen_width/2 + 125 , 20),(screen_width - 20, 20), 2)
+    pygame.draw.line(screen,(255,255,255),(screen_width - 20, 20),(screen_width - 20, screen_height - 20), 2)
+    pygame.draw.line(screen,(255,255,255),(20, 20),(20, screen_height - 20), 2)
+    pygame.draw.line(screen,(255,255,255),(screen_width/2 - 115, screen_height - 20),(20, screen_height - 20), 2)
+    pygame.draw.line(screen,(255,255,255),(screen_width/2 + 125, screen_height - 20),(screen_width - 20, screen_height - 20), 2)
+    pygame.draw.line(screen,(255,255,255),(screen_width/2 - 115, 45 ),(screen_width/2 + 125, 45), 2)
+    pygame.draw.line(screen,(255,255,255),(screen_width/2 - 115, 20),(screen_width/2 - 115, 45), 2)
+    pygame.draw.line(screen,(255,255,255),(screen_width/2 + 125, 20),(screen_width/2 + 125, 45), 2)
+    pygame.draw.line(screen,(255,255,255),(screen_width/2 - 115, screen_height - 20),(screen_width/2 - 115, screen_height - 55), 2)
+    pygame.draw.line(screen,(255,255,255),(screen_width/2 + 125, screen_height - 20),(screen_width/2 + 125, screen_height - 55), 2)
+    pygame.draw.line(screen,(255,255,255),(screen_width/2 - 115, screen_height - 55),(screen_width/2 + 125, screen_height - 55), 2)
+
+def multiplayer_boundary():
+    pygame.draw.line(screen, white,(20, 20),(20, screen_height - 20), 2)
+    pygame.draw.line(screen, white,(20, screen_height - 20),(screen_width - 20, screen_height - 20), 2)
+    pygame.draw.line(screen, white,(screen_width - 20, screen_height - 20),(screen_width- 20, 20), 2)
+    pygame.draw.line(screen, white,(20, 20),(screen_width - 20, 20), 2)
+    pygame.draw.line(screen, white, (screen_width/2, 20),(screen_width/2, 60), 2)
+    pygame.draw.line(screen, white, (screen_width/2, screen_height - 20),(screen_width/2, screen_height - 60), 2)
+
+def intro_words():
+    options.render_to(screen ,(screen_width/2 - 75, screen_height/2 + 15), 'LOCAL', grey)
+    options.render_to(screen ,(screen_width/2 - 160, screen_height/2 + 50), 'MULTIPLAYER', grey)
+    options.render_to(screen ,(screen_width/2 - 150, screen_height/2+150), 'VS COMPUTER', grey)
+
+def intro_boundary():
+
+    pygame.draw.line(screen,(255,255,255),(20, 20),(screen_width - 20, 20), 2)
+    pygame.draw.line(screen,(255,255,255),(screen_width - 20, 20),(screen_width - 20, 190), 2)
+    pygame.draw.line(screen,(255,255,255),(20, 20),(20, 190), 2)
+    pygame.draw.line(screen,(255,255,255),(screen_width - 20, 280),(screen_width - 20, screen_height - 20), 2)
+    pygame.draw.line(screen,(255,255,255),(20, 280),(20, screen_height - 20), 2)
+    pygame.draw.line(screen,(255,255,255),(screen_width - 20, screen_height - 20),(20, screen_height - 20), 2)
+
+def welcome_words():
+    heading.render_to(screen ,(screen_width/2 - 190, 125), 'WELCOME TO', lightgrey)
+    heading1.render_to(screen ,(screen_width/2 - 227 , 180), 'PONG', white)
+    pygame.draw.line(screen, blue, (screen_width/2 + 235, 230), (screen_width,230), 50)
+    pygame.draw.line(screen, red, (screen_width/2 - 235, 230), (0, 230), 50)
+
+
+#VsComputerWords
+def VsComputer_words():
+    if choice == 2:
+        letter.render_to(screen ,(150, 200), 'C', grey)
+        letter.render_to(screen ,(150, 250), 'O', grey)
+        letter.render_to(screen ,(150, 300), 'M', grey)
+        letter.render_to(screen ,(150, 350), 'P', grey)
+        letter.render_to(screen ,(150, 400), 'U', grey)
+        letter.render_to(screen ,(150, 450), 'T', grey)
+        letter.render_to(screen ,(150, 500), 'E', grey)
+        letter.render_to(screen ,(150, 550), 'R', grey)
+        letter.render_to(screen ,(screen_width - 150, 250), 'P', grey)
+        letter.render_to(screen ,(screen_width - 150, 300), 'L', grey)
+        letter.render_to(screen ,(screen_width - 150, 350), 'A', grey)
+        letter.render_to(screen ,(screen_width - 150, 400), 'Y', grey)
+        letter.render_to(screen ,(screen_width - 150, 450), 'E', grey)
+        letter.render_to(screen ,(screen_width - 150, 500), 'R', grey)
+#MultiplayerWords
+def Multiplayer_words():
+    if choice == 1:
+        letter.render_to(screen ,(screen_width - 125, 225), 'P', grey)
+        letter.render_to(screen ,(screen_width - 125, 275), 'L', grey)
+        letter.render_to(screen ,(screen_width - 125, 325), 'A', grey)
+        letter.render_to(screen ,(screen_width - 125, 375), 'Y', grey)
+        letter.render_to(screen ,(screen_width - 125, 425), 'E', grey)
+        letter.render_to(screen ,(screen_width - 125, 475), 'R', grey)
+        letter.render_to(screen ,(screen_width - 125, 525), '1', grey)
+        letter.render_to(screen ,(125, 225), 'P', grey)
+        letter.render_to(screen ,(125, 275), 'L', grey)
+        letter.render_to(screen ,(125, 325), 'A', grey)
+        letter.render_to(screen ,(125, 375), 'Y', grey)
+        letter.render_to(screen ,(125, 425), 'E', grey)
+        letter.render_to(screen ,(125, 475), 'R', grey)
+        letter.render_to(screen ,(125, 525), '2', grey)
+
+
+#making player, opponent and ball
+global ball, player, opponent
+ball = pygame.Rect(screen_width/2-15, screen_height/2-15,30,30)
+player = pygame.Rect(screen_width - 45 ,screen_height/2 - 70,15,150)
+opponent = pygame.Rect(30 ,screen_height/2 - 70, 15, 150)
+ball1 = pygame.Rect(400, 400,inc,inc)
+
+
+
+#player, opponent and ball speed
+ball_speed_x = -8
+ball_speed_y = -8
+player_speed = 6
+opponent_speed =6
+
+
+#colors
+bg_color =  (0, 0, 0)
+white = (255, 255, 255)
+blue = (255,94,94)
+red = (95,163,254)
+grey = (124, 124, 124)
+lightgrey = (204, 204, 204)
+darkgrey = (10,10,10)
+
+   
+   
+def countdown3():
+    while True:      
+        screen.fill(bg_color)
+        pygame.draw.rect(screen, red, player)
+        pygame.draw.rect(screen, blue, opponent)
+        pygame.draw.line(screen,(255,255,255),(screen_width/2, 45),(screen_width/2,screen_height/2 - 45), 2)
+        pygame.draw.line(screen,(255,255,255),(screen_width/2,screen_height/2 + 37),(screen_width/2, screen_height - 55), 2)
+
+        Multiplayer_words()
+        VsComputer_words()
+        if choice == 1:
+            multiplayer_boundary()
+        elif choice == 2:
+            computer_boundary()
+       
+        font1.render_to(screen ,(screen_width/2-30, screen_height/2-40),'3' , grey)
+        pygame.display.update()
+        clock.tick(30)
+        pygame.time.delay(800)
+        break
+       
+def countdown2():
+    while True:
+        screen.fill(bg_color)
+        pygame.draw.rect(screen, red, player)
+        pygame.draw.rect(screen, blue, opponent)
+        pygame.draw.line(screen,(255,255,255),(screen_width/2, 45),(screen_width/2,screen_height/2 - 45), 2)
+        pygame.draw.line(screen,(255,255,255),(screen_width/2,screen_height/2 + 37),(screen_width/2, screen_height - 55), 2)
+
+        Multiplayer_words()
+        VsComputer_words()
+        if choice == 1:
+            multiplayer_boundary()
+        elif choice == 2:
+            computer_boundary()
+       
+        font1.render_to(screen ,(screen_width/2-30, screen_height/2-40),'2' , grey)
+        pygame.display.update()
+        clock.tick(30)
+        pygame.time.delay(800)
+        break
+
+def countdown1():
+    while True:
+        screen.fill(bg_color)
+        pygame.draw.rect(screen, red, player)
+        pygame.draw.rect(screen, blue, opponent)
+        pygame.draw.line(screen,(255,255,255),(screen_width/2, 45),(screen_width/2,screen_height/2 - 45), 2)
+        pygame.draw.line(screen,(255,255,255),(screen_width/2,screen_height/2 + 37),(screen_width/2, screen_height - 55), 2)
+
+
+        Multiplayer_words()
+        VsComputer_words()
+        if choice == 1:
+            multiplayer_boundary()
+        elif choice == 2:
+            computer_boundary()
+       
+        font1.render_to(screen ,(screen_width/2-30, screen_height/2-40),'1' , grey)
+        pygame.display.update()
+        clock.tick(30)
+        pygame.time.delay(800)
+        break
+
+def countdown0():
+    while True:
+        screen.fill(bg_color)
+        pygame.draw.rect(screen, red, player)
+        pygame.draw.rect(screen, blue, opponent)
+        pygame.draw.line(screen,(255,255,255),(screen_width/2, 45),(screen_width/2,screen_height/2 - 45), 2)
+        pygame.draw.line(screen,(255,255,255),(screen_width/2,screen_height/2 + 37),(screen_width/2, screen_height - 55), 2)
+
+        Multiplayer_words()
+        VsComputer_words()
+        if choice == 1:
+            multiplayer_boundary()
+        elif choice == 2:
+            computer_boundary()
+       
+        font1.render_to(screen ,(screen_width/2-72, screen_height/2-40),'GO' , grey)
+        pygame.display.update()
+        clock.tick(30)
+        pygame.time.delay(800)
+        a = 2
+        break
+
+def end_boundary():
+    pygame.draw.line(screen, white, (screen_width - 20, 20), (20, 20), 3)
+    pygame.draw.line(screen, white, (screen_width - 20, 95), (screen_width - 20, 20), 3)
+    pygame.draw.line(screen, white, (20, 95), (20, 20), 3)
+    pygame.draw.line(screen, white, (screen_width - 20, 290), (screen_width - 20, screen_height - 20), 3)
+    pygame.draw.line(screen, white, (20, 290), (20, screen_height - 20), 3)
+    pygame.draw.line(screen, white, (20, screen_height - 20), (screen_width - 340, screen_height - 20), 3)
+    pygame.draw.line(screen, white, (screen_width - 20, screen_height - 20), (screen_width - 170, screen_height - 20), 3)
+    heading3.render_to(screen ,(screen_width - 330, screen_height - 28.5), 'Ayush Bharshetty', white)
+
+def outerblack():
+    #outerbalck boundary
+    pygame.draw.line(screen,bg_color,(0,0),(screen_width,0), 38) #top
+    pygame.draw.line(screen,bg_color,(screen_width,screen_height),(screen_width,0),42) #right
+    pygame.draw.line(screen,bg_color,(screen_width,screen_height),(0,screen_height),48)#bottom
+    pygame.draw.line(screen,bg_color,(0,screen_height),(0,0),32)#left
+
+def gameover_text():
+    heading2.render_to(screen ,(screen_width/2 - 230, 110), 'GAME', lightgrey)
+    heading2.render_to(screen ,(screen_width/2 - 80, 205), 'OVER', lightgrey)
+    pygame.draw.line(screen, blue, (screen_width/2 - 245, 145), (0 ,145), 60)        
+    pygame.draw.line(screen, blue, (screen_width/2 + 115, 145), (screen_width,145), 60)
+    pygame.draw.line(screen, red, (screen_width/2 - 95, 235), (0, 235), 60)
+    pygame.draw.line(screen, red, (screen_width, 235), (screen_width - 340, 235), 60)
+
+def reset():
+    #resetting all actor locations
+    player.y = screen_height/2 - 70
+    opponent.y = screen_height/2 - 70
+    ball.x = screen_width/2 - 15
+    ball.y = screen_height/2-15
+
+def end_menu():
+    options1.render_to(screen ,(screen_width/2 - 106, screen_height/2), 'RETURN TO', grey)
+    options1.render_to(screen ,(screen_width/2 - 110, screen_height/2 + 30), 'MAIN  MENU', grey)
+    options1.render_to(screen ,(screen_width/2 - 106, screen_height/2 + 105), 'TRY AGAIN', grey)
+    options1.render_to(screen ,(screen_width/2 - 40, screen_height/2 + 180), 'QUIT', grey)
+   
+
+#MainGame
+while True:
+    #START MENU
+    while a == 0:
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+            select = 0
+            a = 0
+            choice = 0
+                   
+            screen.fill(bg_color)
+            mouse = pygame.mouse.get_pos()
+
+            if tryagain == 2:
+                gameover_text()
+                end_menu()
+                end_boundary()
+                pygame.draw.rect(screen, white, closing1)
+                rectx -= 25
+                thic += 26
+           
+            if rectx <= 1:
+                rectx = 0
+                Multiplayer_words()
+                VsComputer_words()
+                if choice == 1:
+                    multiplayer_boundary()
+                elif choice == 2:
+                    computer_boundary()
+
+            #pygame.draw.rect(screen, red, [screen_width/2 - 200,screen_height/2,400,100])
+            #pygame.draw.rect(screen, blue, [screen_width/2 - 200,screen_height/2+120,400,100])
+            intro_words()
+
+            #outer boundary
+            intro_boundary()
+           
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:
+
+                    if screen_width/2-150 <= mouse[0] <= screen_width/2+150 and screen_height/2 <= mouse[1] <= screen_height/2+80:
+                        choice = 1
+                        select = 1
+                        a = 1
+                    elif screen_width/2-150 <= mouse[0] <= screen_width/2+150 and screen_height/2+100 <= mouse[1] <= screen_height/2+180:
+                        choice = 2
+                        select = 1
+                        a = 1
+
+                if screen_width/2-150 <= mouse[0] <= screen_width/2+150 and screen_height/2 <= mouse[1] <= screen_height/2+80:
+                    #pygame.draw.rect(screen, white, [screen_width/2 - 2000,screen_height/2,400,100])
+                    options.render_to(screen ,(screen_width/2 - 75, screen_height/2 + 15), 'LOCAL', lightgrey)
+                    options.render_to(screen ,(screen_width/2 - 160, screen_height/2 + 50), 'MULTIPLAYER', lightgrey)
+
+                elif screen_width/2-150 <= mouse[0] <= screen_width/2+150 and screen_height/2+100 <= mouse[1] <= screen_height/2+180:
+                    #pygame.draw.rect(screen, white, [screen_width/2 - 2000,screen_height/2+120,400,100])
+                    options.render_to(screen ,(screen_width/2 - 150, screen_height/2+150), 'VS COMPUTER', lightgrey)
+               
+            welcome_words()
+           
+
+            if select == 1:
+                a = 1
+                break
+
+
+            pygame.display.update()
+            clock.tick(30)
+       
+    #START MENU TO GAME
+    while a == 1:
+
+        screen.fill(bg_color)
+       
+           
+        closing1 = pygame.Rect (rectx, 0, thic, screen_height)
+        cover = pygame.Rect (0, 0, 30, screen_height)
+
+        outerblack()
+       
+        if rectx > 0:
+            if tryagain == 0:
+                options.render_to(screen ,(screen_width/2 - 75, screen_height/2 + 15), 'LOCAL', grey)
+                options.render_to(screen ,(screen_width/2 - 160, screen_height/2 + 50), 'MULTIPLAYER', grey)
+                options.render_to(screen ,(screen_width/2 - 150, screen_height/2+150), 'VS COMPUTER', grey)
+
+                #outer boundary
+                pygame.draw.line(screen,(255,255,255),(20, 20),(screen_width - 20, 20), 2)
+                pygame.draw.line(screen,(255,255,255),(screen_width - 20, 20),(screen_width - 20, 190), 2)
+                pygame.draw.line(screen,(255,255,255),(20, 20),(20, 190), 2)
+                pygame.draw.line(screen,(255,255,255),(screen_width - 20, 280),(screen_width - 20, screen_height - 20), 2)
+                pygame.draw.line(screen,(255,255,255),(20, 280),(20, screen_height - 20), 2)
+                pygame.draw.line(screen,(255,255,255),(screen_width - 20, screen_height - 20),(20, screen_height - 20), 2)
+               
+
+                #Main Heading                
+                heading.render_to(screen ,(screen_width/2 - 190, 125), 'WELCOME TO', lightgrey)
+                heading1.render_to(screen ,(screen_width/2 - 227 , 180), 'PONG', white)
+
+                #SideLines
+                pygame.draw.line(screen, blue, (screen_width/2 + 235, 230), (screen_width,230), 50)
+                pygame.draw.line(screen, red, (screen_width/2 - 235, 230), (0, 230), 50)
+
+                pygame.draw.rect(screen, white, closing1)
+                rectx -= 25
+                thic += 26
+           
+           
+            elif tryagain == 1:
+                gameover_text()
+                end_menu()
+                end_boundary()
+                pygame.draw.rect(screen, white, closing1)
+                rectx -= 25
+                thic += 26
+
+        if rectx <= 1:
+            rectx = 0
+            Multiplayer_words()
+            VsComputer_words()
+            if choice == 1:
+                multiplayer_boundary()
+            elif choice == 2:
+                computer_boundary()
+           
+            pygame.draw.rect(screen, red, player)
+            pygame.draw.rect(screen, blue, opponent)
+            pygame.draw.line(screen,(255,255,255),(screen_width/2, 45),(screen_width/2,screen_height - 55), 2)
+            font1.render_to(screen ,(screen_width/2-30, screen_height/2-40), '3', grey)
+           
+            pygame.draw.rect(screen, white, closing1)
+            thic -= 25
+             
+           
+
+        if thic <= -2:
+            a = 2
+            rectx = screen_width - 30
+            thic = 1
+
+        pygame.display.update()
+        clock.tick(60)
+
+    #COUNTDOWN
+    while a == 2:
+        outerblack()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+        countdown3()
+        countdown2()
+        countdown1()
+        countdown0()
+        tryagain = 0
+        a = 3
+
+    #MAIN GAME MECHANISM
+    while a == 3:
+       
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_DOWN:
+                    player_speed = 0
+                    player_speed += 8
+                if event.key == pygame.K_UP:
+                    player_speed = 0
+                    player_speed -= 8
+
+                if choice == 1:
+                    if event.key == pygame.K_s:
+                        opponent_speed = 0
+                        opponent_speed += 8
+                    if event.key == pygame.K_w:
+                        opponent_speed = 0
+                        opponent_speed -= 8
+       
+       
+        #so that ball bounces of rectangles in local multiplayer
+        if choice == 2:
+            if ball.bottom >= screen_height - 55 and ball.right <= screen_width/2 + 120 and ball.left >= screen_width/2 - 110:
+                ball_speed_y *= -1
+                ball.bottom = screen_height - 55
+                hitx = ball.x
+                hity = ball.bottom
+           
+            if ball.top <= 45 and ball.right <= screen_width/2 + 120 and ball.left >= screen_width/2 - 110:
+                ball_speed_y *= -1
+                ball.top = 45
+                hitx = ball.x
+                hity = ball.top
+
+        #ball boundary limits
+        if ball.top <= 21:
+            ball_speed_y *= -1
+            ball.top = 21
+            hitx = ball.x
+            hity = ball.top
+               
+        if ball.bottom >= screen_height - 21:
+            ball_speed_y *= -1
+            ball.bottom = screen_height - 21
+            hitx = ball.x
+            hity = ball.bottom
+
+        if ball.left <= 21:
+            ball_speed_x *= -1
+            ball.left = 21
+            hitx = 21
+            hity = ball.y
+            if choice == 1:
+                oob1 -= 1
+
+        if ball.right >= screen_width - 21:
+            ball_speed_x *= -1
+            ball.right = screen_width - 21
+            hitx = screen_width-21
+            hity = ball.y
+            if choice == 1:
+                oob2 -= 1
+            if choice == 2:
+                oob -= 1
+       
+        #ball player hit interaction
+        if ball.colliderect(player):
+            ball_speed_x *= -1
+            if choice == 1:
+                score2 += 1
+            if choice == 2:
+                score += 1
+        if ball.colliderect(opponent):
+            ball_speed_x *= -1
+            if choice == 1:
+                score1 += 1
+       
+        #player boundaries
+        if player.top <= 33:
+            player.top = 33
+        if player.bottom  >= screen_height - 31:
+            player.bottom = screen_height - 31
+
+        #opponent boundaries  
+        if choice == 2:
+            if opponent.bottom >= ball.y + 100:
+                opponent_speed = 0
+                opponent_speed -= 8
+            if opponent.top <= ball.y - 70:
+                opponent_speed = 0
+                opponent_speed += 8
+           
+        if opponent.top <= 33:
+            opponent.top = 33
+        if opponent.bottom  >= screen_height - 31:
+            opponent.bottom = screen_height - 31
+
+        #initialising ball and player speed
+        ball.x += ball_speed_x
+        ball.y += ball_speed_y  
+        player.y += player_speed
+        opponent.y += opponent_speed
+
+        #boundary hit animation
+        if hitxs < 50:
+            hitxs += 0.5
+        elif hitxs >= 50:
+            hitxs = 0
+       
+        if hitys < 50:
+            hitys += 0.5
+        elif hitys >= 50:
+            hitys = 0
+       
+        #rendering all actors
+        screen.fill(bg_color)
+        hit = pygame.Rect(hitx, hity,hitxs,hitys)
+        pygame.draw.circle(screen, lightgrey, (hitx, hity), hitxs, width=0)
+        pygame.draw.circle(screen, bg_color, (hitx, hity), hitxs-1, width=0)
+        pygame.draw.rect(screen, red, player)
+        pygame.draw.rect(screen, blue, opponent)
+        pygame.draw.ellipse(screen,white , ball)
+        #pygame.draw.ellipse(screen,grey , hit)
+        pygame.draw.line(screen,(255,255,255),(screen_width/2, 45),(screen_width/2,screen_height - 55), 2)
+
+        #rendering fonts
+        font1.render_to(screen ,(screen_width/2-74, screen_height/2-30), 'VS', grey)
+        mscore.render_to(screen ,(250, screen_height/2 - 65), 'g', grey)
+
+        #game bg and outline structure
+        outerblack()
+
+        if choice == 1:
+            lives1()
+            mscore.render_to(screen, (screen_width - 260, screen_height/2 - 20), str(score2), grey)
+            mscore.render_to(screen, (260, screen_height/2 - 20), str(score1), grey)
+           
+        if choice == 2:
+            lives2()
+            options.render_to(screen ,(screen_width/2-106, 10), 'SCORE:'+str(score), grey)
+            lives.render_to(screen ,(x, screen_height - 50), 'g '*oob, grey)  
+           
+        Multiplayer_words()
+        VsComputer_words()
+        if choice == 1:
+            multiplayer_boundary()
+        elif choice == 2:
+            computer_boundary()
+        pygame.display.update()
+        clock.tick(120)
+
+        ball1x = ball.x
+        ball1y = ball.y
+       
+        if oob <= 0:
+            a = 4
+            score = 0
+            oob = 5
+            pygame.time.delay(1200)
+        if oob1 <= 0 or oob2 <= 0:
+            a =4
+            score1 = 0
+            score2 = 0
+            oob1 = 5
+            oob2 = 5
+            pygame.time.delay(1200)      
+       
+    #GAME TO END MENU
+    while a == 4:
+       
+
+        screen.fill(bg_color)
+        outerblack()
+       
+        if rectx >= 1:
+            pygame.draw.rect(screen, red, player)
+            pygame.draw.rect(screen, blue, opponent)
+            pygame.draw.ellipse(screen,white , ball)
+            pygame.draw.line(screen,(255,255,255),(screen_width/2, 45),(screen_width/2,screen_height - 55), 2)
+
+        if choice == 1 and rectx >= 1:
+            multiplayer_boundary()
+        elif choice == 2 and rectx >= 1:
+            computer_boundary()
+           
+        closing1 = pygame.Rect (rectx, 0, thic, screen_height)
+        cover = pygame.Rect (0, 0, 30, screen_height)
+       
+       
+        if rectx > 0:
+            pygame.draw.rect(screen, white, closing1)
+            rectx -= 18
+            thic += 19
+
+        if rectx <= 1:
+            rectx = 0
+            gameover_text()
+            end_menu()
+            end_boundary()
+            pygame.draw.rect(screen, white, closing1)
+            thic -= 18
+             
+           
+
+        if thic <= -2:
+            a = 5
+            rectx = screen_width - 30
+            thic = 1
+
+        pygame.display.update()
+        clock.tick(60)
+       
+    #END MENU
+    while a == 5:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+       
+       
+
+        select = 0
+        outerblack()
+        reset()
+
+        screen.fill(bg_color)
+
+        gameover_text()
+       
+        end_boundary()
+       
+       
+        mouse = pygame.mouse.get_pos()
+
+        end_menu()
+
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if screen_width/2-150 <= mouse[0] <= screen_width/2+150 and screen_height/2 <= mouse[1] <= screen_height/2+80:
+                        a = 6
+                        ball.x = screen_width/2 - 15
+                        ball.y = screen_height/2 - 15
+                        tryagain = 1
+                elif screen_width/2-115 <= mouse[0] <= screen_width/2+135 and screen_height/2+100 <= mouse[1] <= screen_height/2+160:
+                        a = 1
+                        ball.x = screen_width/2 - 15
+                        ball.y = screen_height/2 - 15
+                        tryagain = 1
+                elif screen_width/2-40 <= mouse[0] <= screen_width/2+40 and screen_height/2+175 <= mouse[1] <= screen_height/2+210:
+                        pygame.quit()
+                        sys.exit()
+
+        if screen_width/2-115 <= mouse[0] <= screen_width/2+135 and screen_height/2 <= mouse[1] <= screen_height/2+70:
+                #pygame.draw.rect(screen, white, [screen_width/2 - 2000,screen_height/2,400,100])
+                options1.render_to(screen ,(screen_width/2 - 106, screen_height/2), 'RETURN TO', white)
+                options1.render_to(screen ,(screen_width/2 - 110, screen_height/2 + 30), 'MAIN  MENU', white)
+
+        elif screen_width/2-115 <= mouse[0] <= screen_width/2+135 and screen_height/2+100 <= mouse[1] <= screen_height/2+160:
+                #pygame.draw.rect(screen, white, [screen_width/2 - 2000,screen_height/2+120,400,100])
+                options1.render_to(screen ,(screen_width/2 - 106, screen_height/2 + 105), 'TRY AGAIN', white)
+               
+
+        elif screen_width/2-40 <= mouse[0] <= screen_width/2+40 and screen_height/2+175 <= mouse[1] <= screen_height/2+1210:
+                options1.render_to(screen ,(screen_width/2 - 40, screen_height/2 + 180), 'QUIT', white)
+       
+       
+       
+        pygame.display.update()
+        clock.tick(120)  
+
+    while a == 6:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        screen.fill(bg_color)
+
+        outerblack()
+        if rectx >= 1:
+            gameover_text()
+            end_boundary()
+            end_menu()
+       
+        closing1 = pygame.Rect (rectx, 0, thic, screen_height)
+        cover = pygame.Rect (0, 0, 30, screen_height)
+       
+        if rectx > 0:
+            pygame.draw.rect(screen, white, closing1)
+            rectx -= 18
+            thic += 19
+
+        if rectx <= 1:
+            rectx = 0
+            welcome_words()
+            intro_boundary()
+            intro_words()
+            pygame.draw.rect(screen, white, closing1)
+            thic -= 18
+           
+        if thic <= 0:
+            a = 0
+
+       
+        #options1.render_to(screen ,(screen_width/2 - 110, screen_height/2 + 30), 'WORKS LOL', white)
+   
+        pygame.display.update()
+        clock.tick(60)
